@@ -1,5 +1,6 @@
-
+//Standard IO(s)
 #include <iostream> 
+#include <cstdio>
 
 #include "headertest/uwu.h"
 
@@ -9,10 +10,17 @@
 #include <Magick++.h> 
 
 
+//X11 to screenshot:
+#include <X11/Xlib.h>
+#include <X11/X.h>
+
+
+//C_mag
+#include "headers/CImg.h"
+
 // this or add Magick:: to everything
 using namespace Magick; 
-
-
+using namespace cimg_library;
 
 
 // Geometry::Geometry(unsigned int x, unsigned int y);
@@ -61,6 +69,7 @@ static void activate (GtkApplication* app, gpointer user_data)
   gtk_window_set_title (GTK_WINDOW (window), "Nyah UWU");
   gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
   gtk_widget_show_all (window);
+  
 }
 
 
@@ -70,6 +79,44 @@ int main (int    argc, char **argv)
     InitializeMagick(*argv);
     GtkApplication *app;
     int status;
+
+    Display *display = XOpenDisplay(NULL);
+    Window root = DefaultRootWindow(display);
+
+   XWindowAttributes gwa;
+
+   XGetWindowAttributes(display, root, &gwa);
+   int width = gwa.width;
+   int height = gwa.height;
+
+   XImage *image = XGetImage(display,root, 0,0 , width,height,AllPlanes, 2);
+
+   unsigned char *array = new unsigned char[width * height * 3];
+
+   unsigned long red_mask = image->red_mask;
+   unsigned long green_mask = image->green_mask;
+   unsigned long blue_mask = image->blue_mask;
+
+   for (int x = 0; x < width; x++)
+      for (int y = 0; y < height ; y++)
+      {
+         unsigned long pixel = XGetPixel(image,x,y);
+
+         unsigned char blue = pixel & blue_mask;
+         unsigned char green = (pixel & green_mask) >> 8;
+         unsigned char red = (pixel & red_mask) >> 16;
+
+         array[(x + width * y) * 3] = red;
+         array[(x + width * y) * 3+1] = green;
+         array[(x + width * y) * 3+2] = blue;
+      }
+
+   CImg<unsigned char> pic(array,width,height,1,3);
+   pic.save_png("blah.png");
+
+   printf("%ld %ld %ld\n",red_mask>> 16, green_mask>>8, blue_mask);
+
+
 
     crop_image("gawr.jpg", "output.png", 200, 200, 200, 200);
 

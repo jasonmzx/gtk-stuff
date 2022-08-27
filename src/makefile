@@ -9,15 +9,18 @@ magickflags2=`Magick++-config --ldflags --libs`
 
 errflags= -Wall -Wextra
 
-inputfile   = main.cpp headertest/uwu.h headertest/uwu.cpp
-outputfile  = nyah.exe 
+inputfile   = main.cpp headertest/uwu.h headertest/uwu.cpp headers/CImg.h
+#outputfile  = nyah.exe #For Windows
+outputfile = nyan-linux #For Ubuntu
 
 maincpp: main.cpp
 
-		g++ ${gtkflags1} ${magickflags1} ${errflags} -o ${outputfile} ${inputfile} ${gtkflags2} ${magickflags2}
+		g++ ${gtkflags1} ${magickflags1} ${errflags} -o ${outputfile} ${inputfile} ${gtkflags2} ${magickflags2} -lX11
 
 clean:
 		rm *.exe 
+		rm ${outputfile}
+
 
 
 
